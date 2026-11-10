@@ -1,0 +1,17 @@
+{
+  "name": "gdoc-to-overleaf",
+  "description": "Google Doc to Overleaf: a Claude Code skill that converts a Google Doc into LaTeX, optionally to a venue's style guide, and puts it in Overleaf.",
+  "owner": {
+    "name": "Nicholas Kruus",
+    "url": "https://github.com/NicholasKruus"
+  },
+  "plugins": [
+    {
+      "name": "gdoc-to-overleaf",
+      "source": "./plugins/gdoc-to-overleaf",
+      "description": "Convert a Google Doc into a LaTeX project in Overleaf, inferring theorems, captions, display maths and code from formatting, conforming to a style guide on request, and checking every word against the doc.",
+      "category": "productivity",
+      "tags": ["latex", "overleaf", "google-docs", "academic-writing"]
+    }
+  ]
+}

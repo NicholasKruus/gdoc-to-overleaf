@@ -2,6 +2,8 @@
 """gdoc-to-overleaf helper: the deterministic half of the skill.
 
     python g2o.py env
+    python g2o.py workdir
+    python g2o.py collect --into WORK --after EPOCH [--dir DOWNLOADS]
     python g2o.py prepare <doc.docx> --out WORK [--suggestions reject|accept]
     python g2o.py check   WORK/project --source WORK/source.json [--allow FILE]
     python g2o.py package WORK/project --zip OUT.zip [--notes FILE] [--managed PATH ...]
@@ -99,6 +101,49 @@ def require_pandoc():
     if status != "ok":
         fail(3, "pandoc %s. Install it with: %s" % (status, install_hint()))
     return path
+
+
+def cmd_workdir(_args):
+    import tempfile
+    import time
+    work = tempfile.mkdtemp(prefix="gdoc-to-overleaf-")
+    print(json.dumps({"work": work, "now": int(time.time())}, indent=1))
+
+
+def downloads_dir():
+    home = os.path.expanduser("~")
+    for cand in (os.path.join(home, "Downloads"), os.path.join(home, "downloads")):
+        if os.path.isdir(cand):
+            return cand
+    return home
+
+
+def cmd_collect(args):
+    """Move the .docx the browser just downloaded into the work folder."""
+    import time
+    folder = args.dir or downloads_dir()
+    deadline = time.time() + args.wait
+    while True:
+        found = []
+        for name in os.listdir(folder):
+            path = os.path.join(folder, name)
+            if name.lower().endswith(".docx") and os.path.isfile(path) and \
+                    os.path.getmtime(path) >= args.after - 2:
+                found.append((os.path.getmtime(path), name))
+        busy = [n for n in os.listdir(folder) if n.endswith((".crdownload", ".part", ".download"))]
+        if found and not busy:
+            break
+        if time.time() > deadline:
+            fail(4, "No new .docx appeared in %s within %ds. If the browser asked where to save "
+                    "it, finish that, or pass --dir." % (folder, args.wait))
+        time.sleep(1)
+    found.sort()
+    name = found[-1][1]
+    os.makedirs(args.into, exist_ok=True)
+    dest = os.path.join(args.into, "source.docx")
+    shutil.move(os.path.join(folder, name), dest)
+    print(json.dumps({"downloaded": name, "moved_to": dest, "bytes": os.path.getsize(dest),
+                      "other_new_docx": [n for _, n in found[:-1]]}, indent=1, ensure_ascii=False))
 
 
 # ---- source words from the doc ---------------------------------------------------
@@ -571,6 +616,12 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("env", help="check Python, pandoc and git")
+    sub.add_parser("workdir", help="make a fresh work folder and print it with the time")
+    g = sub.add_parser("collect", help="move a just-downloaded .docx into the work folder")
+    g.add_argument("--into", required=True)
+    g.add_argument("--after", type=float, required=True, help="epoch seconds from workdir")
+    g.add_argument("--dir", help="download folder (default ~/Downloads)")
+    g.add_argument("--wait", type=int, default=60)
     p = sub.add_parser("prepare", help="convert a .docx into a draft LaTeX project")
     p.add_argument("docx")
     p.add_argument("--out", required=True)
@@ -587,7 +638,8 @@ def main():
     k.add_argument("--notes", help="JSON with doc, style, decisions, allowances")
     k.add_argument("--managed", nargs="*", help="paths the tool owns (default: gdoc)")
     args = ap.parse_args()
-    {"env": cmd_env, "prepare": cmd_prepare, "check": cmd_check, "package": cmd_package}[args.cmd](args)
+    {"env": cmd_env, "workdir": cmd_workdir, "collect": cmd_collect, "prepare": cmd_prepare,
+     "check": cmd_check, "package": cmd_package}[args.cmd](args)
 
 
 if __name__ == "__main__":

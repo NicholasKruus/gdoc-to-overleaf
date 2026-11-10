@@ -17,7 +17,7 @@ QUOTES = str.maketrans({
 })
 # Characters stripped from both ends of a word. Inner punctuation stays, so
 # "self-improvement" and "U.S." keep their shape.
-EDGE = "\"'`.,;:!?()[]{}<>*_~|/\\\u2013\u2014\u2026\u00b7\u2022#"
+EDGE = "\"'`.,;:!?()[]{}<>*_~|/\\\u2013\u2014\u2026\u00b7\u2022#\u220e\u25a1\u25a0\u2610"
 NUMBERISH = re.compile(r"^\(?\[?(?:[0-9]+(?:[.\-][0-9]+)*[a-z]?|[ivxlcdm]+|[a-z])\]?\)?$")
 YEAR = re.compile(r"(?:19|20)[0-9]{2}[a-z]?")
 

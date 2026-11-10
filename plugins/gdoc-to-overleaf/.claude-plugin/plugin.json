@@ -1,0 +1,13 @@
+{
+  "name": "gdoc-to-overleaf",
+  "displayName": "Google Doc to Overleaf",
+  "description": "Convert a Google Doc into a LaTeX project in Overleaf, inferring theorems, captions, display maths and code from formatting, conforming to a style guide on request, and checking every word against the doc.",
+  "author": {
+    "name": "Nicholas Kruus",
+    "url": "https://github.com/NicholasKruus"
+  },
+  "homepage": "https://github.com/NicholasKruus/gdoc-to-overleaf",
+  "repository": "https://github.com/NicholasKruus/gdoc-to-overleaf",
+  "license": "MIT",
+  "keywords": ["latex", "overleaf", "google-docs", "pandoc", "academic-writing"]
+}

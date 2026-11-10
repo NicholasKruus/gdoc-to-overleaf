@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.9"
+          - os: ubuntu-latest
+            python: "3.13"
+          - os: macos-latest
+            python: "3.13"
+          - os: windows-latest
+            python: "3.13"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install pandoc (Linux)
+        if: runner.os == 'Linux'
+        uses: pandoc/actions/setup@v1
+      - name: Install pandoc (macOS)
+        if: runner.os == 'macOS'
+        run: brew install pandoc
+      - name: Install pandoc (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install pandoc -y --no-progress
+          echo "C:\Program Files\Pandoc" | Out-File -FilePath $env:GITHUB_PATH -Append
+      - name: Environment
+        run: python plugins/gdoc-to-overleaf/skills/gdoc-to-overleaf/scripts/g2o.py env
+      - name: Tests
+        run: python -m unittest -v tests/test_g2o.py
+
+  plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Manifests are valid JSON
+        run: |
+          python -m json.tool .claude-plugin/marketplace.json > /dev/null
+          python -m json.tool plugins/gdoc-to-overleaf/.claude-plugin/plugin.json > /dev/null
