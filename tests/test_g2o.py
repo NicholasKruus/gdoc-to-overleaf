@@ -87,6 +87,12 @@ class TestPrepare(Prepared):
         self.assertNotIn("textquotesingle", body)
         self.assertIn("{gdoc/figures/image1.png}", body)
 
+    def test_apostrophes_keep_word_boundaries(self):
+        with open(os.path.join(self.project, "gdoc", "body.tex"), encoding="utf-8") as fh:
+            body = fh.read()
+        self.assertIn("Banach's theorem", body)
+        self.assertIn("Good's paper", body)
+
     def test_report_surfaces_dropped_formatting(self):
         with open(os.path.join(self.work, "report.md"), encoding="utf-8") as fh:
             report = fh.read()

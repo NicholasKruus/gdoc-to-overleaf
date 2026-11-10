@@ -73,16 +73,16 @@ Work out, asking only for what the request leaves open:
 2. In a new Chrome tab, navigate to
    `https://docs.google.com/document/d/<DOC_ID>/export?format=docx`. Chrome saves
    `<doc title>.docx` to its download folder; the tab may stay blank.
-3. `G2O collect --into WORK --after NOW` moves that file to `WORK/source.docx`. If
-   it times out, Chrome may be asking where to save the file (the user clicks
-   Save), or downloads go elsewhere (pass `--dir`).
+3. `G2O collect --into WORK --after NOW` moves that file into `WORK` and prints its
+   path (`DOCX`). If it times out, Chrome may be asking where to save the file (the
+   user clicks Save), or downloads go elsewhere (pass `--dir`).
 
 A doc you cannot open in the browser gives a Google sign-in or "request access"
 page instead of a download. Tell the user; do not request access for them.
 
 ## Step 3: Prepare a draft
 
-`G2O prepare WORK/source.docx --out WORK/run` writes:
+`G2O prepare DOCX --out WORK/run` writes:
 
 - `WORK/run/project/`: `main.tex` (a plain article with the doc's title and
   author line), `gdoc/body.tex` (pandoc's conversion), `gdoc/support.tex`

@@ -423,6 +423,14 @@ def project_tokens(root, main="main.tex"):
     return out.items, parser
 
 
+def _pdflatex_safe(ch):
+    """Characters LaTeX's default UTF-8 setup with T1 fonts can typeset in text."""
+    o = ord(ch)
+    return (0xA0 <= o <= 0x17F or 0x2010 <= o <= 0x2027 or o in (
+        0x2030, 0x2032, 0x2033, 0x2039, 0x203A, 0x20AC, 0x2122, 0x2190, 0x2192, 0x02C6, 0x02DC,
+        0x2212))
+
+
 def lint(root, main="main.tex"):
     """Cheap structural checks that do not need a TeX installation."""
     problems, warnings = [], []
@@ -468,6 +476,12 @@ def lint(root, main="main.tex"):
             warnings.append("%s: typed LaTeX from the doc is still escaped as text" % name)
         if "\\textquotesingle" in t:
             warnings.append("%s: contains \\textquotesingle; use a plain apostrophe" % name)
+        prose = re.sub(r"\$[^$]*\$|\\\(.*?\\\)|\\\[.*?\\\]", " ", t, flags=re.S)
+        risky = sorted({ch for ch in prose if ord(ch) > 127 and not _pdflatex_safe(ch)})
+        if risky:
+            warnings.append("%s: characters pdflatex may not typeset outside maths: %s. Put them "
+                            "in maths (\\(\\times\\)), or compile with LuaLaTeX or XeLaTeX."
+                            % (name, " ".join(risky[:20])))
     for dirpath, _, files in os.walk(root):
         for f in files:
             if f.endswith(".bib"):

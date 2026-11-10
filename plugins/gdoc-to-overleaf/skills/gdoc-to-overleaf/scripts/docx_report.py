@@ -32,7 +32,7 @@ MONO = {
 LABEL_START = re.compile(
     r"^(Theorem|Lemma|Proposition|Corollary|Definition|Remark|Example|Claim|Conjecture|"
     r"Assumption|Proof|Fact|Observation|Notation|Problem|Question|Exercise|Solution|Hypothesis|"
-    r"Axiom|Algorithm)\b[^.:]{0,20}[.:]")
+    r"Axiom|Algorithm)(?:\s+[0-9A-Z][0-9.]*|\s*\([^)]{1,60}\))+\s*[.:]|^Proof\s*[.:]")
 CAPTION_START = re.compile(r"^(Figure|Fig\.|Table|Algorithm|Listing|Exhibit)\s*[0-9A-Z][0-9.]*\s*[.:\u2013\u2014-]", re.I)
 TYPED_LATEX = re.compile(r"(\$[^$\s][^$]*\$|\\[a-zA-Z]{2,}\{|\\(?:begin|end|cite|ref|label)\b)")
 NUMBERED_HEADING = re.compile(r"^\s*(?:[0-9]+(?:\.[0-9]+)*\.?|[A-Z]\.|[IVX]+\.)\s+\S")

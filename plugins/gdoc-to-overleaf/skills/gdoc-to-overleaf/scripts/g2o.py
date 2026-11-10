@@ -140,7 +140,7 @@ def cmd_collect(args):
     found.sort()
     name = found[-1][1]
     os.makedirs(args.into, exist_ok=True)
-    dest = os.path.join(args.into, "source.docx")
+    dest = os.path.join(args.into, name)
     shutil.move(os.path.join(folder, name), dest)
     print(json.dumps({"downloaded": name, "moved_to": dest, "bytes": os.path.getsize(dest),
                       "other_new_docx": [n for _, n in found[:-1]]}, indent=1, ensure_ascii=False))
@@ -341,7 +341,10 @@ def cmd_prepare(args):
             shutil.move(os.path.join(media, name), os.path.join(gdoc, "figures", name))
         os.rmdir(media)
     body = body.replace("{figures/media/", "{gdoc/figures/")
-    body = re.sub(r"\\textquotesingle(?:\{\})?\s?", "'", body)
+    # pandoc writes a straight apostrophe as \textquotesingle{} before a space
+    # ("labs' work") and as "\textquotesingle " inside a word ("Banach's").
+    body = body.replace("\\textquotesingle{}", "'").replace("\\textquotesingle ", "'")
+    body = body.replace("\\textquotesingle", "'")
     with open(os.path.join(gdoc, "body.tex"), "w", encoding="utf-8", newline="\n") as fh:
         fh.write("% Converted from a Google Doc by gdoc-to-overleaf. Edits here are\n"
                  "% overwritten by the next sync; change the doc instead.\n\n" + body)
