@@ -1,0 +1,27 @@
+% gdoc-to-overleaf support file. \input this in the preamble of any template.
+% It loads only what the converted body needs, without options, so it sits
+% alongside a venue's own style file. Packages a template already loads are
+% skipped by LaTeX. Remove lines the body does not use if a venue forbids them.
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{longtable}
+\usepackage{soul}
+\makeatletter
+\@ifpackageloaded{hyperref}{}{\usepackage{hyperref}}
+\@ifundefined{pandoc@box}{\newsavebox\pandoc@box}{}
+\providecommand*\pandocbounded[1]{% scales an image to fit the text block
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi}
+\makeatother
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}

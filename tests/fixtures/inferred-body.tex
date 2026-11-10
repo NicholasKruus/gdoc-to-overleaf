@@ -1,0 +1,84 @@
+% Converted from a Google Doc by gdoc-to-overleaf.
+
+\begin{abstract}
+We study when an agent that improves its own improvement procedure converges. Our main result gives a sufficient condition in terms of a contraction constant \(\lambda < 1\), and we show the bound is tight.
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+
+Recursive self-improvement has been discussed since \citet{good1965}.\footnote{Good's paper is often cited as the origin of the intelligence explosion argument.} We make three contributions:
+
+\begin{enumerate}
+\item A formal definition of an \textbf{improvement operator}.
+\item A convergence theorem (Theorem~\ref{thm:main}).
+\item Experiments, summarised in Table~\ref{tab:conv} and Figure~\ref{fig:steps}.
+\end{enumerate}
+
+Related ideas appear in several lines of work:
+\begin{itemize}
+\item Fixed-point theory
+  \begin{itemize}
+  \item Banach's theorem
+  \item Kleene's recursion theorem
+  \end{itemize}
+\item Meta-learning % Comment: Cite Schmidhuber (1987) here.
+\end{itemize}
+
+\hl{TODO: add a sentence on bounded rationality here.}
+
+\section{Main Result}\label{sec:main}
+
+\begin{definition}
+An \emph{improvement operator} is a map \(T:A \rightarrow A\) on a complete metric space of agents.
+\end{definition}
+
+\begin{theorem}\label{thm:main}
+If \(T\) is a contraction with constant \(\lambda < 1\), then the sequence \(a_{n + 1} = T(a_{n})\) converges to a unique fixed point.
+\end{theorem}
+
+\begin{proof}
+This is the Banach fixed-point theorem applied to \(T\). The error after \(n\) steps is at most
+\[
+d(a_{n},a^{*}) \leq \lambda^{n}d(a_{0},a^{*})
+\]
+which goes to zero.
+\end{proof}
+
+\subsection{Implementation}\label{sec:impl}
+
+The update loop is short:
+\begin{verbatim}
+for step in range(n):
+    agent = improve(agent)
+\end{verbatim}
+
+\section{Experiments}\label{sec:exp}
+
+Table~\ref{tab:conv} reports convergence speed. We set \(\epsilon = 10^{-3}\) throughout.
+
+\begin{table}[t]
+\centering
+\caption{Convergence speed on the toy benchmark.}\label{tab:conv}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Method} & \textbf{Steps to converge} & \textbf{Final error} \\
+\midrule
+Baseline & 120 & 0.031 \\
+Ours & 45 & 0.004 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=3.75in,alt={Bar chart of steps to converge for four settings}]{gdoc/figures/image1.png}
+\caption{Steps to converge across four settings.}\label{fig:steps}
+\end{figure}
+
+As Figure~\ref{fig:steps} shows, the contraction constant predicts speed well.
+
+\begin{thebibliography}{9}
+\bibitem[Good(1965)]{good1965} Good, I. J. (1965). Speculations concerning the first ultraintelligent machine. Advances in Computers, 6, 31--88.
+
+\bibitem[Banach(1922)]{banach1922} Banach, S. (1922). Sur les opérations dans les ensembles abstraits. Fundamenta Mathematicae, 3, 133--181.
+\end{thebibliography}
