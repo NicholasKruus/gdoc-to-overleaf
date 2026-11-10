@@ -48,7 +48,10 @@ and what you could not do.
 - **Document class and options.** Submission mode versus camera-ready (for
   example `\usepackage{neurips_2026}` versus `[final]`, `\usepackage{icml2026}`
   versus `[accepted]`, ACL's `[review]`). Default to submission.
-- **Anonymity.** For double-blind submission: replace author names, affiliations
+- **Anonymity.** Some venue styles hide the authors themselves in submission mode
+  (NeurIPS prints "Anonymous Author(s)"; its `ack` environment hides
+  acknowledgements). Then keep the real names in the source and let the style do
+  it; nothing needs declaring. Otherwise, for double-blind submission: replace author names, affiliations
   and emails with the template's anonymous form, remove or hide acknowledgements
   and funding, and flag self-identifying text ("our previous work [12]") for the
   author. Do not reword it yourself. Each removal is a wording change: declare it
@@ -74,9 +77,13 @@ and what you could not do.
   equations the guide wants numbered) rather than rewriting.
 - **Figures.** Check the minimum resolution or vector requirement and flag
   low-resolution images. Keep alt text.
-- **Page limit.** After compiling, count the pages that count towards the limit
-  (usually excluding references and appendices) and tell the user if the paper is
-  over. Never cut text to fit.
+- **Page limit.** The compile log gives the total. Find where the uncounted part
+  starts (usually the references, checklist or appendix heading; `find` in the PDF
+  preview shows the page), count the content pages before it, and tell the user if
+  the paper is over. Never cut text to fit.
+- **Template-owned files.** A checklist or other file the template `\input`s is
+  the template's, not the doc's. Pass it to the check with `--skip-input` so its
+  text is not counted as added words; the check lists what it skipped.
 - **Supplementary material and appendices.** Follow the guide on whether
   appendices go in the main PDF or a separate file. Ask if unclear.
 - **Metadata.** Running title, keywords, ACM CCS concepts and the like. Fill them

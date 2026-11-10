@@ -41,9 +41,14 @@ await (async () => {
     return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
   };
   const out = {files: Object.keys(files).length};
-  if (files['main.tex']) {
-    const main = new TextDecoder().decode(await bytes(files['main.tex']));
-    out.mainInputs = (main.match(/\\(?:input|include)\{[^}]*\}/g) || []).slice(0, 20);
+  // The main file is the top-level .tex with \documentclass (often main.tex).
+  for (const name of Object.keys(files).filter((n) => !n.includes('/') && n.endsWith('.tex')).sort((a, b) => (b === 'main.tex') - (a === 'main.tex'))) {
+    const text = new TextDecoder().decode(await bytes(files[name]));
+    if (/^[^%\n]*\\documentclass/m.test(text)) {
+      out.mainFile = name;
+      out.mainInputs = (text.match(/\\(?:input|include)\{[^}]*\}/g) || []).slice(0, 20);
+      break;
+    }
   }
   if (!files[MANIFEST]) {
     out.manifest = false;

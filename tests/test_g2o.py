@@ -169,6 +169,30 @@ class TestCheck(Prepared):
         self.assertTrue(any("stale" in w or "never" in w for w in data["warnings"]))
 
 
+    def test_template_input_can_be_skipped(self):
+        project = self.fresh_project(self.inferred())
+        with open(os.path.join(project, "checklist.tex"), "w", encoding="utf-8") as fh:
+            fh.write("\\section*{Paper checklist}\nAnswer every question.\n")
+        main = os.path.join(project, "main.tex")
+        with open(main, encoding="utf-8") as fh:
+            text = fh.read()
+        with open(main, "w", encoding="utf-8") as fh:
+            fh.write(text.replace("\\end{document}", "\\input{checklist.tex}\n\\end{document}"))
+        code, _, _ = self.check(project)
+        self.assertEqual(code, 1)
+        code, data, _ = self.check(project, "--skip-input", "checklist.tex")
+        self.assertEqual(code, 0, data)
+        self.assertTrue(any("checklist.tex" in w for w in data["warnings"]))
+
+    def test_bad_allowance_file_fails_cleanly(self):
+        bad = os.path.join(self.tmp, "bad.json")
+        with open(bad, "w", encoding="utf-8") as fh:
+            fh.write('{"why": "\\input"}')
+        code, _, err = self.check(self.project, "--allow", bad)
+        self.assertEqual(code, 2)
+        self.assertIn("Cannot read the allowances file", err)
+
+
 class TestPackage(Prepared):
     def test_manifest_and_zip(self):
         project = self.fresh_project(self.inferred())

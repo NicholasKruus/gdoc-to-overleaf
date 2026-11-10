@@ -126,11 +126,13 @@ class Tokens:
 
 
 class Parser:
-    def __init__(self, root, label_envs):
+    def __init__(self, root, label_envs, skip=()):
         self.root = root
         self.label_envs = label_envs
         self.seen_files = set()
         self.missing_files = []
+        self.skip = {os.path.splitext(x.replace("\\", "/"))[0] for x in skip}
+        self.skipped = []
 
     # ---- low-level scanning ----------------------------------------------
 
@@ -177,6 +179,9 @@ class Parser:
     # ---- files --------------------------------------------------------------
 
     def read_file(self, name):
+        if os.path.splitext(name.replace("\\", "/"))[0] in self.skip:
+            self.skipped.append(name)
+            return ""
         for cand in (name, name + ".tex"):
             path = os.path.normpath(os.path.join(self.root, cand))
             if os.path.isfile(path):
@@ -397,9 +402,12 @@ def strip_comments(text):
     return "\n".join(out)
 
 
-def project_tokens(root, main="main.tex"):
-    """Tokens for what the project prints, starting from its main file."""
-    parser = Parser(root, set(LABEL_ENVS))
+def project_tokens(root, main="main.tex", skip=()):
+    """Tokens for what the project prints, starting from its main file.
+
+    Files in skip (template-owned inputs such as a venue checklist) are not read.
+    """
+    parser = Parser(root, set(LABEL_ENVS), skip)
     path = os.path.join(root, main)
     with open(path, encoding="utf-8", errors="replace") as fh:
         text = strip_comments(fh.read())
@@ -431,13 +439,15 @@ def _pdflatex_safe(ch):
         0x2212))
 
 
-def lint(root, main="main.tex"):
+def lint(root, main="main.tex", skip=()):
     """Cheap structural checks that do not need a TeX installation."""
     problems, warnings = [], []
     texts = {}
+    skip = {os.path.splitext(x.replace("\\", "/"))[0] for x in skip}
     for dirpath, _, files in os.walk(root):
         for f in files:
-            if f.endswith(".tex"):
+            rel = os.path.relpath(os.path.join(dirpath, f), root).replace(os.sep, "/")
+            if f.endswith(".tex") and os.path.splitext(rel)[0] not in skip:
                 p = os.path.join(dirpath, f)
                 with open(p, encoding="utf-8", errors="replace") as fh:
                     texts[os.path.relpath(p, root).replace(os.sep, "/")] = strip_comments(fh.read())
@@ -491,7 +501,8 @@ def lint(root, main="main.tex"):
     plain_class = re.search(r"\\documentclass(?:\[[^\]]*\])?\{(?:article|report|book|amsart|scrartcl)\}", alltext)
     if plain_class and re.search(r"\\cite[tp]\b|\\citealp\b|\\citeauthor\b", alltext) and \
             not re.search(r"\\usepackage(?:\[[^\]]*\])?\{[^}]*\b(?:natbib|biblatex)\b", alltext):
-        problems.append("\\citet/\\citep are used but neither natbib nor biblatex is loaded")
+        warnings.append("\\citet/\\citep are used but natbib or biblatex is not loaded here; "
+                        "fine if a venue style loads it, otherwise the compile fails")
     for r in sorted(refs - labels):
         problems.append("\\ref{%s} has no matching \\label" % r)
     for c in sorted(cites - bibkeys - {"*"}):

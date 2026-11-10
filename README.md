@@ -73,6 +73,11 @@ Or copy `plugins/gdoc-to-overleaf/skills/gdoc-to-overleaf/` to
 Overleaf's free plan is enough. The skill uses Overleaf's web interface, not its
 Git integration.
 
+Tested end to end in November 2026 on macOS against overleaf.com:
+- a new project;
+- an update guarded against edits made in Overleaf;
+- a first sync into the official NeurIPS 2026 template.
+
 ## Privacy
 
 Your doc goes from your browser to a temporary folder on your computer, and from

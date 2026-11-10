@@ -48,7 +48,7 @@ project from the same origin, hashes the files the last sync wrote, and returns:
 | `added: [...]` | Files in `gdoc/` that the last sync did not write. They are left alone; mention them. |
 | `manifest: false` with `managedLooking` files | `gdoc/` exists but has no manifest, so you cannot tell what was edited. Ask before overwriting. |
 | `manifest: false`, no `gdoc/` | First sync into this project (for example, a co-author's template). See "First sync into an existing project". |
-| `mainInputs` | The `\input` lines in `main.tex`. The body is only used if `\input{gdoc/body}` (and `\input{gdoc/support}` in the preamble) are there. |
+| `mainFile`, `mainInputs` | The project's main file (the top-level `.tex` with `\documentclass`; templates often call it something other than `main.tex`) and its `\input` lines. The body is only used if `\input{gdoc/body}` (and `\input{gdoc/support}` in the preamble) are there. |
 
 Also read the manifest's `decisions` and `style` (returned as fields) and apply
 them in step 4 of the skill.
@@ -72,7 +72,9 @@ interrupted sync is caught by the next guard run.
 5. Repeat for each folder that has new or changed files.
 
 To create a missing folder: select its parent, click **New folder** in the
-file-tree toolbar, type the name, and press Enter.
+file-tree toolbar, type the name, and press Enter. Check where it landed: a new
+folder can end up in the project root even with its parent selected. If so, drag
+it onto the parent folder in the file tree.
 
 A file the new sync no longer produces (an image removed from the doc) stays in
 Overleaf. List it for the user; do not delete it.
@@ -82,12 +84,15 @@ Overleaf. List it for the user; do not delete it.
 The usual case is a co-author's project already set up with a venue template.
 
 1. Create `gdoc/` and `gdoc/figures/` with **New folder**, and upload the files.
-2. `main.tex` needs `\input{gdoc/support}` in the preamble and `\input{gdoc/body}`
+2. The main file (`mainFile` from the guard) needs `\input{gdoc/support}` in the preamble and `\input{gdoc/body}`
    where the content goes, plus the doc's title, authors and abstract in the
    template's macros. **Ask before changing their `main.tex`**, and show the exact
-   lines. With a yes, build the new `main.tex` in `WORK/run/project/`, then upload
-   it to the project root (select `main.tex` first so the root folder is selected)
-   and confirm **Overwrite**.
+   lines. With a yes, fetch the current main file's text (adapt the guard script
+   to return it), build the new version in `WORK/run/project/` under the same
+   name, run the check with `--main <that name>` and `--skip-input` for
+   template-owned inputs such as a checklist, then upload it to the project root
+   (open another root file first so the root folder is selected) and confirm
+   **Overwrite**.
 
 ## Compile and verify
 

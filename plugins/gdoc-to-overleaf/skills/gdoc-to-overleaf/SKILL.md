@@ -127,6 +127,7 @@ style, page limit). Report what only the author can supply. Never write it.
 
 ```
 G2O check WORK/run/project --source WORK/run/source.json [--allow WORK/allowances.json]
+          [--main <main file, if not main.tex>] [--skip-input <template-owned files>]
 ```
 
 It exits 0 only when every word and formula the doc contains is printed by the

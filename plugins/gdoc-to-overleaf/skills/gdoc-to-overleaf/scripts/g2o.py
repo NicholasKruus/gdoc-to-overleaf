@@ -5,7 +5,7 @@
     python g2o.py workdir [--base DIR]
     python g2o.py collect --into WORK --after EPOCH [--dir DOWNLOADS]
     python g2o.py prepare <doc.docx> --out WORK [--suggestions reject|accept]
-    python g2o.py check   WORK/project --source WORK/source.json [--allow FILE]
+    python g2o.py check   WORK/project --source WORK/source.json [--main FILE] [--allow FILE] [--skip-input FILE ...]
     python g2o.py package WORK/project --zip OUT.zip [--notes FILE] [--managed PATH ...]
 
 prepare  converts the .docx with pandoc into WORK/project (main.tex, gdoc/body.tex,
@@ -50,6 +50,14 @@ MIN_PANDOC = (3, 1)
 def fail(code, message):
     print(json.dumps({"error": message}, indent=1, ensure_ascii=False), file=sys.stderr)
     sys.exit(code)
+
+
+def load_json(path, what):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, ValueError) as exc:
+        fail(2, "Cannot read the %s file %s: %s" % (what, path, exc))
 
 
 # ---- environment --------------------------------------------------------------
@@ -450,18 +458,18 @@ def cmd_check(args):
     with open(args.source, encoding="utf-8") as fh:
         source = json.load(fh)
     src = [tuple(t) for t in source["tokens"]]
-    allowances = []
-    if args.allow:
-        with open(args.allow, encoding="utf-8") as fh:
-            allowances = json.load(fh)
+    allowances = load_json(args.allow, "allowances") if args.allow else []
 
-    problems, warnings = latex_words.lint(project, args.main)
+    skip = args.skip_input or []
+    problems, warnings = latex_words.lint(project, args.main, skip)
     try:
-        out, parser = latex_words.project_tokens(project, args.main)
+        out, parser = latex_words.project_tokens(project, args.main, skip)
     except OSError as exc:
         fail(2, "Cannot read the project: %s" % exc)
     for name in parser.missing_files:
         problems.append("\\input{%s}: file not found" % name)
+    if parser.skipped:
+        warnings.append("Not compared (template-owned, --skip-input): %s" % ", ".join(parser.skipped))
 
     sm = difflib.SequenceMatcher(None, ["%s:%s" % t for t in src], ["%s:%s" % t for t in out],
                                  autojunk=False)
@@ -588,8 +596,7 @@ def cmd_package(args):
             fail(2, "Managed path not found: %s" % entry)
     notes = {}
     if args.notes:
-        with open(args.notes, encoding="utf-8") as fh:
-            notes = json.load(fh)
+        notes = load_json(args.notes, "notes")
     manifest = {
         "tool": "gdoc-to-overleaf",
         "version": 1,
@@ -642,6 +649,8 @@ def main():
     c.add_argument("--source", required=True)
     c.add_argument("--main", default="main.tex")
     c.add_argument("--allow", help="JSON list of declared changes")
+    c.add_argument("--skip-input", nargs="*", metavar="FILE",
+                   help="template-owned \\input files to leave out of the comparison")
     k = sub.add_parser("package", help="write the sync manifest and a zip")
     k.add_argument("project")
     k.add_argument("--zip")

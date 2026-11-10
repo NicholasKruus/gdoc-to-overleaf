@@ -30,5 +30,6 @@ await (async () => {
     rerunNeeded: /Rerun to get|Label\(s\) may have changed/.test(log),
     missingChars,
     unicodeErrors: count(/Unicode character .* not set up for use with LaTeX/g),
+    otherWarnings: [...new Set(log.match(/(?:LaTeX|Package \w+) Warning: [^\n]{0,90}/g) || [])].slice(0, 8),
   };
 })()
