@@ -26,7 +26,7 @@ text as it is (with its bold or italic) and tell the user.
 | Centred italic "Figure N: ..." next to an `[image]` | Figure caption | `figure` with `\includegraphics`, `\caption{...}`, `\label{fig:...}`; drop "Figure N:" |
 | Centred italic "Table N: ..." next to a table | Table caption | `table` with `\caption` above the `tabular` (the usual convention) and `\label{tab:...}` |
 | "Figure 2", "Table 1", "Section 3", "Theorem 1", "Eq. (4)" in the text | Cross-reference | `Figure~\ref{fig:...}` etc. Only when the target exists in the doc |
-| `(Author, Year)`, `Author (Year)`, `[12]` and a reference list at the end | Citations | `thebibliography` with one `\bibitem[Author(Year)]{key}` per entry, in the doc's wording, and `\citet`/`\citep`/`\cite`. Keep the entry text exactly as typed. A `.bib` file only if the style guide demands BibTeX |
+| `(Author, Year)`, `Author (Year)`, `[12]` and a reference list at the end | Citations | `thebibliography` with one `\bibitem[Author(Year)]{key}` per entry, in the doc's wording, and `\citet`/`\citep` (the default template loads natbib; with a venue template, use its citation commands). Keep the entry text exactly as typed. A `.bib` file only if the style guide demands BibTeX |
 | A link whose text is a citation | Citation that also links | Prefer the citation; keep `\href` only if there is no reference list |
 | `==TODO ...==` highlight, or coloured notes to self | Author's note | Keep the words. Ask the user whether to keep, hide (`%` comment, which the check will flag for a declared allowance) or drop them |
 | Indented paragraph, not in a list | Block quotation | `quote` (or `quotation` for several paragraphs) |

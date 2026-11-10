@@ -487,6 +487,11 @@ def lint(root, main="main.tex"):
             if f.endswith(".bib"):
                 with open(os.path.join(dirpath, f), encoding="utf-8", errors="replace") as fh:
                     bibkeys.update(k.strip() for k in re.findall(r"@\w+\s*\{\s*([^,\s]+)\s*,", fh.read()))
+    alltext = "\n".join(texts.values())
+    plain_class = re.search(r"\\documentclass(?:\[[^\]]*\])?\{(?:article|report|book|amsart|scrartcl)\}", alltext)
+    if plain_class and re.search(r"\\cite[tp]\b|\\citealp\b|\\citeauthor\b", alltext) and \
+            not re.search(r"\\usepackage(?:\[[^\]]*\])?\{[^}]*\b(?:natbib|biblatex)\b", alltext):
+        problems.append("\\citet/\\citep are used but neither natbib nor biblatex is loaded")
     for r in sorted(refs - labels):
         problems.append("\\ref{%s} has no matching \\label" % r)
     for c in sorted(cites - bibkeys - {"*"}):

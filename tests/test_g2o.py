@@ -179,17 +179,18 @@ class TestPackage(Prepared):
                        "decisions": ["bold 'Theorem N.' -> theorem environment"]}, fh)
         code, data, err = run("package", project, "--zip", zpath, "--notes", notes)
         self.assertEqual(code, 0, err)
-        with open(os.path.join(project, ".gdoc-to-overleaf.json"), encoding="utf-8") as fh:
+        with open(os.path.join(project, "gdoc", "gdoc-to-overleaf.json"), encoding="utf-8") as fh:
             manifest = json.load(fh)
         self.assertIn("gdoc/body.tex", manifest["managed"])
         self.assertIn("gdoc/figures/image1.png", manifest["managed"])
         self.assertNotIn("main.tex", manifest["managed"])
+        self.assertNotIn("gdoc/gdoc-to-overleaf.json", manifest["managed"])
         self.assertEqual(manifest["decisions"], ["bold 'Theorem N.' -> theorem environment"])
         names = zipfile.ZipFile(zpath).namelist()
         for expected in ("main.tex", "gdoc/body.tex", "gdoc/figures/image1.png",
-                         ".gdoc-to-overleaf.json"):
+                         "gdoc/gdoc-to-overleaf.json"):
             self.assertIn(expected, names)
-        self.assertTrue(all("\\" not in n for n in names))
+        self.assertTrue(all("\\" not in n and not n.split("/")[-1].startswith(".") for n in names))
 
 
 class TestUnits(unittest.TestCase):

@@ -69,7 +69,10 @@ Work out, asking only for what the request leaves open:
 
 ## Step 2: Export the doc
 
-1. `G2O workdir` prints a fresh folder (`WORK`) and the time (`NOW`).
+1. `G2O workdir --base <dir>` makes a fresh folder (`WORK`) and prints it with the
+   time (`NOW`). Use your scratchpad directory as `<dir>` if the session has one,
+   otherwise omit `--base` (the current directory). It must be a folder the
+   session can read, or Chrome will refuse to upload from it later.
 2. In a new Chrome tab, navigate to
    `https://docs.google.com/document/d/<DOC_ID>/export?format=docx`. Chrome saves
    `<doc title>.docx` to its download folder; the tab may stay blank.
@@ -107,7 +110,7 @@ of monospace lines becomes `verbatim`; `$x^2$` typed in the doc becomes real mat
 
 Write down each pattern you applied as one line in `WORK/notes.json` under
 `decisions`. When you update an existing project, read the `decisions` in its
-`.gdoc-to-overleaf.json` first and apply the same ones, so a re-sync does not
+`gdoc/gdoc-to-overleaf.json` first and apply the same ones, so a re-sync does not
 reshuffle the LaTeX.
 
 When a pattern is ambiguous, prefer the conservative reading (keep it as plain
@@ -158,7 +161,7 @@ Put `doc` (the doc URL), `style` (the venue and year, or null), `decisions` and
 G2O package WORK/run/project --zip WORK/upload.zip --notes WORK/notes.json
 ```
 
-This writes `.gdoc-to-overleaf.json` (the sync manifest: hashes of the files this
+This writes `gdoc/gdoc-to-overleaf.json` (the sync manifest: hashes of the files this
 skill manages, which are `gdoc/` by default) and the zip. The manifest is what lets
 the next update notice edits made in Overleaf.
 
@@ -171,8 +174,9 @@ Read `references/overleaf.md` and follow the part that applies:
   managed files and the manifest. `main.tex` and anything else in the project
   stay as they are, unless the user agreed to replace them.
 
-Then compile in Overleaf, read the errors and warnings, fix and re-upload until it
-compiles, and check the page count against the style guide's limit.
+Then compile in Overleaf, read the log summary (`scripts/overleaf_log.js`), fix
+and re-upload until it compiles cleanly, spot-check passages in the PDF, and check
+the page count against the style guide's limit.
 
 Without Chrome: give the user the zip's path and these steps: Overleaf > New
 Project > Upload Project > select the zip.
@@ -188,13 +192,16 @@ Tell the user, briefly:
 - what still needs the author: style-guide items, missing alt text, figures that
   need a vector version, anything you could not verify.
 
-Then delete `WORK` and close any tabs you opened.
+Then delete `WORK` and close any tabs you opened. The download was moved into
+`WORK`, so nothing is left in the user's Downloads folder.
 
 ## Files
 
 - `scripts/g2o.py`: the commands above. Standard library only.
 - `scripts/docx_report.py`, `scripts/latex_words.py`, `scripts/common.py`: the
   report, the LaTeX reader the check uses, shared normalisation.
+- `scripts/overleaf_guard.js`, `scripts/overleaf_log.js`: run in the Overleaf tab
+  to detect edits made in Overleaf, and to summarise the compile log.
 - `templates/article.tex`, `templates/support.tex`: the default template, and the
   packages the converted body needs in any template.
 - `references/inference.md`, `references/style-guides.md`, `references/overleaf.md`.

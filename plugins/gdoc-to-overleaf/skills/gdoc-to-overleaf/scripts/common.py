@@ -103,6 +103,6 @@ def file_hash(path):
         data = fh.read()
     if any(str(path).lower().endswith(ext) for ext in TEXT_EXT):
         text = data.decode("utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
-        text = "\n".join(line.rstrip() for line in text.split("\n")).strip("\n")
+        text = "\n".join(line.rstrip(" \t") for line in text.split("\n")).strip("\n")
         data = text.encode("utf-8")
     return hashlib.sha256(data).hexdigest()
